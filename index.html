@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ViVi — Group Video Calls</title>
+    <meta name="description" content="ViVi — free, secure, peer-to-peer group video calls with live chat." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+
+    <!-- ===== LOBBY ===== -->
+    <div id="lobby" class="lobby">
+        <div class="lobby-card glass">
+            <div class="logo">
+                <div class="logo-icon">V</div>
+                <span class="logo-text">ViVi</span>
+            </div>
+            <h1 class="lobby-title">Connect, Instantly.</h1>
+            <p class="lobby-subtitle">Free group video calls with live chat — up to 8 people.</p>
+
+            <div class="input-group">
+                <label for="display-name" class="input-label">Your Name</label>
+                <input id="display-name" type="text" class="room-input"
+                       placeholder="Enter your name…" maxlength="24" autocomplete="off" />
+            </div>
+
+            <div class="input-group">
+                <label for="room-id" class="input-label">Room Code</label>
+                <div class="input-wrapper">
+                    <input id="room-id" type="text" class="room-input"
+                           placeholder="Enter or create a room code…"
+                           maxlength="20" autocomplete="off" />
+                    <button id="generate-btn" class="generate-btn" title="Generate random code">⟳</button>
+                </div>
+            </div>
+
+            <button id="join-btn" class="join-btn">
+                <span class="btn-icon">📹</span>
+                <span>Join Call</span>
+            </button>
+
+            <div class="lobby-footer">
+                <span class="badge">🔒 End-to-End Encrypted</span>
+                <span class="badge">⚡ WebRTC P2P</span>
+                <span class="badge">💬 Group Chat</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CALL ROOM ===== -->
+    <div id="call-room" class="call-room hidden">
+
+        <!-- Header -->
+        <header class="call-header glass">
+            <div class="logo small">
+                <div class="logo-icon small">V</div>
+                <span class="logo-text">ViVi</span>
+            </div>
+            <div class="call-info">
+                <span class="room-badge">🔑 <span id="room-label"></span></span>
+                <button id="copy-room-btn" class="icon-btn" title="Copy room code">📋</button>
+                <span class="participant-badge">👥 <span id="participant-count">1</span> / 8</span>
+                <div class="connection-status">
+                    <div class="status-dot" id="status-dot"></div>
+                    <span id="status-text">Connecting…</span>
+                </div>
+            </div>
+            <div id="call-timer" class="call-timer hidden">00:00</div>
+        </header>
+
+        <!-- Main area: video + chat sidebar -->
+        <div class="main-area">
+
+            <!-- Video area -->
+            <div class="video-area" id="video-area">
+                <div class="video-grid" id="video-grid" data-count="1"></div>
+                <!-- Invite overlay -->
+                <div class="invite-overlay" id="invite-overlay">
+                    <div class="invite-card glass">
+                        <div class="invite-icon">👥</div>
+                        <h2>Invite people</h2>
+                        <p>Share this code — up to 7 more can join</p>
+                        <div class="invite-code-row">
+                            <span id="invite-code-display" class="invite-code"></span>
+                            <button id="copy-invite-btn" class="copy-btn">📋 Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Sidebar -->
+            <aside class="chat-panel hidden" id="chat-panel">
+                <div class="chat-header">
+                    <span class="chat-title">💬 Group Chat</span>
+                    <button id="close-chat-btn" class="icon-btn" title="Close chat">✕</button>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-welcome">
+                        <span>👋 Chat is end-to-end relayed. Say hi!</span>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input id="chat-input" type="text" class="chat-input"
+                           placeholder="Type a message…" maxlength="500" autocomplete="off" />
+                    <button id="send-btn" class="send-btn" title="Send">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Invite popup -->
+        <div class="invite-popup glass hidden" id="invite-popup">
+            <div class="popup-header">
+                <span>Invite to room</span>
+                <button id="close-popup-btn" class="icon-btn">✕</button>
+            </div>
+            <div class="invite-code-row">
+                <span id="popup-code-display" class="invite-code"></span>
+                <button id="copy-popup-btn" class="copy-btn">📋 Copy</button>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls glass">
+            <button id="mic-btn"        class="ctrl-btn active" title="Toggle Microphone">
+                <span class="ctrl-icon">🎤</span><span class="ctrl-label">Mic</span>
+            </button>
+            <button id="camera-btn"     class="ctrl-btn active" title="Toggle Camera">
+                <span class="ctrl-icon">📷</span><span class="ctrl-label">Camera</span>
+            </button>
+            <button id="chat-btn"       class="ctrl-btn"        title="Toggle Chat">
+                <span class="ctrl-icon">💬</span><span class="ctrl-label">Chat</span>
+                <span class="unread-badge hidden" id="unread-badge">0</span>
+            </button>
+            <button id="invite-btn"     class="ctrl-btn"        title="Invite people">
+                <span class="ctrl-icon">👥</span><span class="ctrl-label">Invite</span>
+            </button>
+            <button id="leave-btn"      class="ctrl-btn leave-btn" title="Leave Call">
+                <span class="ctrl-icon">📵</span><span class="ctrl-label">Leave</span>
+            </button>
+            <button id="fullscreen-btn" class="ctrl-btn"        title="Fullscreen">
+                <span class="ctrl-icon">⛶</span><span class="ctrl-label">Fullscreen</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
