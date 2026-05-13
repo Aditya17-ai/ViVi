@@ -5,39 +5,39 @@
 const socket = io();
 
 // ---------- DOM ----------
-const lobby             = document.getElementById('lobby');
-const callRoom          = document.getElementById('call-room');
-const joinBtn           = document.getElementById('join-btn');
-const roomIdInput       = document.getElementById('room-id');
-const displayNameInput  = document.getElementById('display-name');
-const generateBtn       = document.getElementById('generate-btn');
-const roomLabel         = document.getElementById('room-label');
-const statusText        = document.getElementById('status-text');
-const statusDot         = document.getElementById('status-dot');
-const callTimerEl       = document.getElementById('call-timer');
-const participantCount  = document.getElementById('participant-count');
-const videoGrid         = document.getElementById('video-grid');
-const inviteOverlay     = document.getElementById('invite-overlay');
-const inviteCodeDisp    = document.getElementById('invite-code-display');
-const copyInviteBtn     = document.getElementById('copy-invite-btn');
-const inviteBtn         = document.getElementById('invite-btn');
-const invitePopup       = document.getElementById('invite-popup');
-const popupCodeDisp     = document.getElementById('popup-code-display');
-const copyPopupBtn      = document.getElementById('copy-popup-btn');
-const closePopupBtn     = document.getElementById('close-popup-btn');
-const copyRoomBtn       = document.getElementById('copy-room-btn');
-const micBtn            = document.getElementById('mic-btn');
-const cameraBtn         = document.getElementById('camera-btn');
-const leaveBtn          = document.getElementById('leave-btn');
-const fullscreenBtn     = document.getElementById('fullscreen-btn');
-const chatBtn           = document.getElementById('chat-btn');
-const chatPanel         = document.getElementById('chat-panel');
-const closeChatBtn      = document.getElementById('close-chat-btn');
-const chatMessages      = document.getElementById('chat-messages');
-const chatInput         = document.getElementById('chat-input');
-const sendBtn           = document.getElementById('send-btn');
-const unreadBadge       = document.getElementById('unread-badge');
-const toastEl           = document.getElementById('toast');
+const lobby = document.getElementById('lobby');
+const callRoom = document.getElementById('call-room');
+const joinBtn = document.getElementById('join-btn');
+const roomIdInput = document.getElementById('room-id');
+const displayNameInput = document.getElementById('display-name');
+const generateBtn = document.getElementById('generate-btn');
+const roomLabel = document.getElementById('room-label');
+const statusText = document.getElementById('status-text');
+const statusDot = document.getElementById('status-dot');
+const callTimerEl = document.getElementById('call-timer');
+const participantCount = document.getElementById('participant-count');
+const videoGrid = document.getElementById('video-grid');
+const inviteOverlay = document.getElementById('invite-overlay');
+const inviteCodeDisp = document.getElementById('invite-code-display');
+const copyInviteBtn = document.getElementById('copy-invite-btn');
+const inviteBtn = document.getElementById('invite-btn');
+const invitePopup = document.getElementById('invite-popup');
+const popupCodeDisp = document.getElementById('popup-code-display');
+const copyPopupBtn = document.getElementById('copy-popup-btn');
+const closePopupBtn = document.getElementById('close-popup-btn');
+const copyRoomBtn = document.getElementById('copy-room-btn');
+const micBtn = document.getElementById('mic-btn');
+const cameraBtn = document.getElementById('camera-btn');
+const leaveBtn = document.getElementById('leave-btn');
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+const chatBtn = document.getElementById('chat-btn');
+const chatPanel = document.getElementById('chat-panel');
+const closeChatBtn = document.getElementById('close-chat-btn');
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+const sendBtn = document.getElementById('send-btn');
+const unreadBadge = document.getElementById('unread-badge');
+const toastEl = document.getElementById('toast');
 
 // ---------- State ----------
 const rtcConfig = {
@@ -47,18 +47,18 @@ const rtcConfig = {
     ]
 };
 
-const peers       = new Map();   // socketId → { pc }
-const peerNames   = new Map();   // socketId → display name
-let localStream   = null;
-let roomId        = null;
-let myName        = 'You';
-let mySocketId    = null;
-let camEnabled    = true;
-let micEnabled    = true;
+const peers = new Map();   // socketId → { pc }
+const peerNames = new Map();   // socketId → display name
+let localStream = null;
+let roomId = null;
+let myName = 'You';
+let mySocketId = null;
+let camEnabled = true;
+let micEnabled = true;
 let callStartTime = null;
 let timerInterval = null;
-let unreadCount   = 0;
-let chatOpen      = false;
+let unreadCount = 0;
+let chatOpen = false;
 
 // ---------- Utilities ----------
 function showToast(msg, ms = 3000) {
@@ -74,7 +74,7 @@ function showToast(msg, ms = 3000) {
 
 function setStatus(state, text) {
     statusText.textContent = text;
-    statusDot.className    = 'status-dot ' + state;
+    statusDot.className = 'status-dot ' + state;
 }
 
 function startTimer() {
@@ -102,8 +102,8 @@ function copyToClipboard(text) {
 }
 
 function escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-              .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
 
 // ---------- Video Grid ----------
@@ -118,17 +118,17 @@ function updateGrid() {
 function addVideoTile(peerId, stream, isLocal = false) {
     if (document.getElementById('tile-' + (isLocal ? 'local' : peerId))) return;
 
-    const tile    = document.createElement('div');
+    const tile = document.createElement('div');
     tile.className = 'video-tile' + (isLocal ? ' local-tile' : '');
-    tile.id        = 'tile-' + (isLocal ? 'local' : peerId);
+    tile.id = 'tile-' + (isLocal ? 'local' : peerId);
 
-    const video   = document.createElement('video');
+    const video = document.createElement('video');
     video.autoplay = true; video.playsInline = true;
     if (isLocal) video.muted = true;
     video.srcObject = stream;
 
-    const label   = document.createElement('div');
-    label.className   = 'tile-label';
+    const label = document.createElement('div');
+    label.className = 'tile-label';
     label.textContent = isLocal ? myName : (peerNames.get(peerId) || 'Peer');
 
     tile.appendChild(video);
@@ -146,9 +146,9 @@ function removeVideoTile(peerId) {
 // ---------- Media ----------
 async function initMedia() {
     const attempts = [
-        { video: true,  audio: true,  label: null },
-        { video: false, audio: true,  label: '🎤 No camera — audio only' },
-        { video: true,  audio: false, label: '📷 No mic — video only' },
+        { video: true, audio: true, label: null },
+        { video: false, audio: true, label: '🎤 No camera — audio only' },
+        { video: true, audio: false, label: '📷 No mic — video only' },
     ];
     for (const a of attempts) {
         try {
@@ -156,7 +156,7 @@ async function initMedia() {
             if (a.label) showToast(a.label, 5000);
             return;
         } catch (err) {
-            const isDevice = ['NotFoundError','DevicesNotFoundError','NotReadableError','OverconstrainedError'].includes(err.name);
+            const isDevice = ['NotFoundError', 'DevicesNotFoundError', 'NotReadableError', 'OverconstrainedError'].includes(err.name);
             if (!isDevice) { showToast('🚫 Camera/mic access denied.', 6000); _fallbackStream(); return; }
         }
     }
@@ -196,7 +196,7 @@ function createPC(peerId) {
     };
 
     pc.onconnectionstatechange = () => {
-        if (['disconnected','failed','closed'].includes(pc.connectionState)) {
+        if (['disconnected', 'failed', 'closed'].includes(pc.connectionState)) {
             removeVideoTile(peerId);
             peers.delete(peerId);
             if (peers.size === 0) { setStatus('disconnected', 'Alone in room'); stopTimer(); }
@@ -207,7 +207,7 @@ function createPC(peerId) {
 }
 
 async function createOffer(peerId) {
-    const pc    = createPC(peerId);
+    const pc = createPC(peerId);
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
     socket.emit('offer', { target: peerId, sdp: offer });
@@ -238,12 +238,12 @@ function appendMessage({ sid, name, text, ts }, isOwn = false) {
     const div = document.createElement('div');
     div.className = 'chat-msg ' + (isOwn ? 'own' : 'other');
 
-    const meta   = document.createElement('div');
+    const meta = document.createElement('div');
     meta.className = 'msg-meta';
     meta.innerHTML = `<span class="msg-name">${escapeHtml(isOwn ? myName : name)}</span><span class="msg-time">${time}</span>`;
 
     const bubble = document.createElement('div');
-    bubble.className   = 'msg-bubble';
+    bubble.className = 'msg-bubble';
     bubble.textContent = text;
 
     div.appendChild(meta);
@@ -260,10 +260,10 @@ function appendMessage({ sid, name, text, ts }, isOwn = false) {
 }
 
 function appendSystemMsg(text) {
-    const div    = document.createElement('div');
+    const div = document.createElement('div');
     div.className = 'chat-msg system';
     const bubble = document.createElement('div');
-    bubble.className   = 'msg-bubble';
+    bubble.className = 'msg-bubble';
     bubble.textContent = text;
     div.appendChild(bubble);
     chatMessages.appendChild(div);
@@ -286,9 +286,9 @@ joinBtn.addEventListener('click', async () => {
     const code = roomIdInput.value.trim().toUpperCase();
     if (!code) { showToast('Please enter a room code.'); return; }
 
-    myName = displayNameInput.value.trim() || `Guest-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+    myName = displayNameInput.value.trim() || `Guest-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
-    joinBtn.disabled     = true;
+    joinBtn.disabled = true;
     roomIdInput.disabled = true;
 
     await initMedia();
@@ -297,9 +297,9 @@ joinBtn.addEventListener('click', async () => {
     lobby.classList.add('hidden');
     callRoom.classList.remove('hidden');
 
-    roomLabel.textContent       = roomId;
-    inviteCodeDisp.textContent  = roomId;
-    popupCodeDisp.textContent   = roomId;
+    roomLabel.textContent = roomId;
+    inviteCodeDisp.textContent = roomId;
+    popupCodeDisp.textContent = roomId;
 
     addVideoTile('local', localStream, true);
     setStatus('', 'Joining room…');
@@ -310,10 +310,10 @@ joinBtn.addEventListener('click', async () => {
 roomIdInput.addEventListener('keydown', e => { if (e.key === 'Enter') joinBtn.click(); });
 
 // ---------- Copy / Invite ----------
-copyRoomBtn.addEventListener('click',   () => copyToClipboard(roomId));
+copyRoomBtn.addEventListener('click', () => copyToClipboard(roomId));
 copyInviteBtn.addEventListener('click', () => copyToClipboard(roomId));
-copyPopupBtn.addEventListener('click',  () => copyToClipboard(roomId));
-inviteBtn.addEventListener('click',     () => invitePopup.classList.toggle('hidden'));
+copyPopupBtn.addEventListener('click', () => copyToClipboard(roomId));
+inviteBtn.addEventListener('click', () => invitePopup.classList.toggle('hidden'));
 closePopupBtn.addEventListener('click', () => invitePopup.classList.add('hidden'));
 document.addEventListener('click', (e) => {
     if (!invitePopup.contains(e.target) && e.target !== inviteBtn) invitePopup.classList.add('hidden');
@@ -347,7 +347,7 @@ leaveBtn.addEventListener('click', () => {
 
 fullscreenBtn.addEventListener('click', () => {
     if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
+        document.documentElement.requestFullscreen().catch(() => { });
         fullscreenBtn.querySelector('.ctrl-icon').textContent = '✕';
     } else {
         document.exitFullscreen();
@@ -430,6 +430,6 @@ socket.on('room-full', () => {
     showToast('❌ Room is full (max 8 users).', 5000);
     lobby.classList.remove('hidden');
     callRoom.classList.add('hidden');
-    joinBtn.disabled     = false;
+    joinBtn.disabled = false;
     roomIdInput.disabled = false;
 });
